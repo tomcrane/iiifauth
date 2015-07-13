@@ -305,22 +305,11 @@
             // The redirected to window will self-close
             // open/closed state is the only thing we can see across domains :(
             log("Opening Auth service - " + authSvc + " - with token service " + tokenSvc);
-            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow'); // ', "height=600,width=600");
+            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //  
             var pollTimer = window.setInterval(function () {
-                try
-                {
-                    log("win: " + win);
-                    if (win.closed) {
-                        window.clearInterval(pollTimer);
-                        on_authed(tokenSvc);
-                    }
-                }
-                catch(cdError)
-                {
-                    var msg = "caught error trying to query for win.closed: " + cdError.message;
-                    writeMessageOnViewer(msg);
-                    log(msg);
+                if (win.closed) {
                     window.clearInterval(pollTimer);
+                    on_authed(tokenSvc);
                 }
             }, 500);
         } else {
