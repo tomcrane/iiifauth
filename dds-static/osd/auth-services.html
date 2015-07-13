@@ -1,0 +1,62 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+</head>
+<body>
+
+    <h2>Popups</h2>
+
+    <button id="acceptTerms" data-login="/iiif/accepttermslogin" data-token="/iiif/tokenterms">Accept terms dialogue</button>
+    <hr />
+    <button id="cas" data-login="/iiif/caslogin" data-token="/iiif/tokencas">CAS dialogue</button>
+    <hr />
+
+    <div id="log" style="margin-top: 10px; height: 50px; border: 2px solid green; width: 45%;"></div>
+
+    <script src="jquery-1.11.1.min.js"></script>
+    <script type="text/javascript">
+
+        function log(text) {
+            $('#log').append(text + "<br>");
+        }
+
+        function do_auth(evt) {
+            var loginSvc = $(this).attr('data-login');
+            var tokenSvc = $(this).attr('data-token');
+
+            // The redirected to window will self-close
+            // open/closed state is the only thing we can see across domains :(
+            log("Opening Auth service - " + loginSvc + " - with token service " + tokenSvc);
+            var win = window.open(loginSvc, 'loginwindow', "height=600,width=600");
+            var pollTimer = window.setInterval(function() {
+                if (win.closed) {
+                    window.clearInterval(pollTimer);
+                    on_authed(tokenSvc);
+                }
+            }, 500);
+        }
+
+        function on_authed(tokenSvc) {
+            log("Fetching Token");
+            $.getJSON(tokenSvc + "?callback=?", on_tokened);
+        }
+
+        function on_tokened(data) {
+
+            var token, error;
+            if (data.hasOwnProperty('accessToken')) {
+                token = data.accessToken;
+                log("Got token: " + token);
+            } else {
+                // error condition
+                log("Got error: " + data.error);
+            }
+        }
+
+        $('button').bind('click', do_auth);
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+﻿<head>
+    <title>main</title>
+    <script>
+
+        var poll = false;
+
+window.addEventListener("message", function(ev) {
+    if (ev.data.message === "deliverResult") {
+        alert("result: " + ev.data.result);
+        ev.source.close();
+        poll = false;
+    }
+});
+
+function Go() {
+    poll = true;
+    var child = window.open("t-child.html?ts="+ (new Date()).getTime(), "_blank", "height=200,width=200");
+    var interval = setInterval(function () {
+        try
+        {
+            if (child && poll)
+            {
+                console.log("asking child...");
+                child.postMessage({ message: "requestResult", result: true }, "*");
+                document.getElementById("status").innerText = "sent " + new Date().getTime();
+            }
+        }
+        catch (err) {
+            alert("really no child");
+        }
+    }, 500);
+
+
+    //var leftDomain = false;
+    //var interval = setInterval(function () {
+    //    //console.log(child.document.domain);
+    //    //return;
+    //    try {
+    //        // this is still throwing when back on original domain
+    //        if (child.document.domain === document.domain)
+    //        {
+    //            if (leftDomain && child.document.readyState === "complete")
+    //            {
+    //                // we're here when the child window returned to our domain
+    //                clearInterval(interval);
+    //                alert("returned: " + child.document.URL);
+    //                child.postMessage({ message: "requestResult" }, "*");
+    //            }
+    //        }
+    //        else {
+    //            // this code should never be reached,
+    //            // as the x-site security check throws
+    //            // but just in case
+    //            leftDomain = true;
+    //        }
+    //    }
+    //    catch(e) {
+    //        // we're here when the child window has been navigated away or closed
+    //        //if (child.closed) {
+    //        //    clearInterval(interval);
+    //        //    alert("closed");
+    //        //    return;
+    //        //}
+    //        //// navigated to another domain
+    //        leftDomain = true;
+    //    }
+    //}, 500);
+}
+    </script>
+</head>
+<body>
+    <button onclick="Go()">Go</button>
+
+
+    <div id="status">
+
+    </div>
+</body>

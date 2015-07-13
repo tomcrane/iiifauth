@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<head>
+    <title>child</title>
+    <script>
+
+        var done = false;
+
+        function iAmDone() {
+            done = true;
+        }
+
+window.addEventListener("message", function(ev) {
+    if (ev.data.message === "requestResult"){
+        document.getElementById("status").innerText = "received " + new Date().getTime();
+        if (done === true) {
+            document.getElementById("status").innerText = "DONE";
+            // ev.source is the opener
+            //alert("posting");
+            ev.source.postMessage({ message: "deliverResult", result: true }, "*");
+        }
+    }
+});
+
+    </script>
+</head>
+<body>
+    <a href="http://www.example.com">Go to example.com</a>
+    Then click the browser Back button when ready.
+
+    <button onclick="iAmDone()">I am done</button>
+
+    <div id="status">
+
+    </div>
+</body>
