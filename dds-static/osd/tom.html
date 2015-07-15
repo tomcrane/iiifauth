@@ -93,7 +93,10 @@
     //}
 
     // -------------------------------------------------------------
-    var tokenStore = {};
+
+jQuery.support.cors = true;    
+
+var tokenStore = {};
     tokenStore.domains = {};
     var seenInfos = []; // store the @id of seen infos. Detecting a redirect is done by comparing the request uri with the @id of the response. If they are different a redirect happened.
     
