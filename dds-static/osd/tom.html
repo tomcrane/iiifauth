@@ -27,6 +27,7 @@
         <select id="infoSelect" style="width:90%" >
             <option label="Gerald, wellcomelibrary.org">http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json</option>
             <option label="Crick (AC), wellcomelibrary.org">http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
+            <option label="Degraded, local.wellcomelibrary.org">http://local.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json</option>
             <option label="Crick (AC), library-uat.wellcomelibrary.org">http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
             <option label="Crick (AC), local.wellcomelibrary.org">http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
             be
@@ -205,7 +206,14 @@
         if (jqXHR.originalId !== infoJson['@id']) {
             log("redirect detected -  - NEED TO HANDLE");
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
+
+
             // TODO: handle this, have we seen before, if not do auth
+            // do we have it in seenInfos?
+            // if yes, then show "no further login..."
+            // if no, then show login UI on button.
+
+
         } else {
             log("Not a redirect");
         }
@@ -216,6 +224,7 @@
             loadSeadragon(infoJson);
             if (services.logout) {
                 $('#authAction').attr('data-login-or-out', services.logout.id);
+                $('#authAction').attr('data-token', services.token.id);
                 changeAuthAction(services.logout.label);
             }
             return;
@@ -309,7 +318,9 @@
             var pollTimer = window.setInterval(function () {
                 if (win.closed) {
                     window.clearInterval(pollTimer);
-                    on_authed(tokenSvc);
+                    if (tokenSvc) {
+                        on_authed(tokenSvc);
+                    }
                 }
             }, 500);
         } else {
@@ -336,21 +347,21 @@
             log("Got error: " + token.error);
         }
 
+        var tokenDomain = getDomain(jqXHR.tokenServiceUsed);
+
         if (error) {
             // Error make unauthed viewer
             tokenStore[jqXHR.tokenServiceUsed] = null;
+            tokenStore.domains[tokenDomain] = null;
             resetSeadragon();
             writeMessageOnViewer("Problem with token: " + token.error);
-            // TODO - if a 302 degraded is possible, are they already seeing it or do we need to do it here?
+            doInfoAjax(getInfoUri(), on_info_complete, false, null);
         } else {
             // store the token
             token['obtained'] = new Date();
             tokenStore[jqXHR.tokenServiceUsed] = token;
-
-            var tokenDomain = getDomain(jqXHR.tokenServiceUsed);
             log("Storing token as most recent for domain " + tokenDomain);
             tokenStore.domains[tokenDomain] = token;
-
             doInfoAjax(getInfoUri(), on_info_complete, false, token);
         }
     }
