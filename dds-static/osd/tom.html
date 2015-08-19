@@ -5,6 +5,12 @@
     <meta charset="utf-8"/>
     <style>
         .bred { color: red; border: 1px solid red;font-weight: bold;}
+        #authbox{
+            margin-top: 10px; height: 90px; border: 2px solid green; width: 90%;
+            font-family:sans-serif;
+            font-size:11px;
+            padding:4px;
+        }
     </style>
 </head>
 <body>
@@ -15,8 +21,9 @@
     <button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/tokencas">CAS dialogue</button>
     <hr/>
     <p>Deduced service behaviour:</p>
-    <div id="authbox" style="margin-top: 10px; height: 50px; border: 2px solid green; width: 45%;">
+    <div id="authbox" style="">
         <button class="authInit" id="authAction">...waiting</button>
+        <p id="authBoxAdditional"></p>
     </div>
     <div id="log" style="margin-top: 10px; padding: 5px; border: 2px solid gray; font-size: 12px; font-family: sans-serif; color: gray;"></div>
 </div>
@@ -24,31 +31,27 @@
     <div style="width: 90%">
         <input type="checkbox" id="beSmart"/> <label for="beSmart">Pre-empt info.json with last used valid token for domain</label>
         <br/>
-        <select id="infoSelect" style="width:90%" >
-            <option label="Gerald, wellcomelibrary.org">http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json</option>
-            <option label="Crick (AC), wellcomelibrary.org">http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
-            <option label="Degraded, local.wellcomelibrary.org">http://local.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json</option>
-            <option label="Crick (AC), library-uat.wellcomelibrary.org">http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
-            <option label="Crick (AC), local.wellcomelibrary.org">http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
-            be
+        <select id="infoSelect" style="width:90%">
+            <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json"></option>
+            <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
+            <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
+            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>            
+            <option label="Crick (AC-clickthrough), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Crick (AC-clickthrough), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Crick (AC-clickthrough), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Degraded, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+            <option label="Degraded, library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+            <option label="Degraded, local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
         </select>
         <button id="infoJsonBtn">Go!</button>
     </div>
     <div id="container" style="width: 805px; height: 605px;"></div>
 </div>
-
-
-
-
     <script src="openseadragon/openseadragon.min.js"></script>
-    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
-<script src="jQuery.XDomainRequest.js"></script>
-<script type="text/javascript">
-
-
-
-   
-    
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+     <!--<script src="jquery-1.11.1.min.js"></script>-->
+    <!--<script src="jQuery.XDomainRequest.js"></script>-->
+    <script type="text/javascript">
 
     //function on_got_info(data) {
     //    log("Got full info.json");
@@ -207,16 +210,23 @@ var tokenStore = {};
         var services = getServices(infoJson);
 
 
-        if (jqXHR.originalId !== infoJson['@id']) {
+        if (jqXHR.status == 200 && jqXHR.originalId !== infoJson['@id']) {
             log("redirect detected -  - NEED TO HANDLE");
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
+            
+            $('#authAction').attr('data-login-or-out', services.login.id);
+            $('#authAction').attr('data-token', services.token.id);
+            changeAuthAction(services.login.label);
+            $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
+            resetSeadragon();
+            loadSeadragon(infoJson);
+            return;
 
             // TODO: handle this, have we seen before, if not do auth
             // do we have it in seenInfos?
             // if yes, then show "no further login..."
             // if no, then show login UI on button.
-
 
         } else {
             log("Not a redirect");
@@ -249,10 +259,38 @@ var tokenStore = {};
         }
 
         // 401
+        log("Assume a 401");
         writeMessageOnViewer("You need to log in to see this");
-        $('#authAction').attr('data-login-or-out', services.login.id);
-        $('#authAction').attr('data-token', services.token.id);
-        changeAuthAction(services.login.label);
+        if (services.clickthrough) {
+            $('#authAction').hide();
+            var htmlStr = '<p>This is a click through auth. Label is <i>' + services.clickthrough.label + '</i></p>';
+            var redirect = encodeURI(location.href.split("?")[0] + "?info=" + getInfoUri());
+            htmlStr += "<p><a href='" + services.clickthrough.id + "?redirecturl=" + redirect + "'>Option 1: With redirect parameter</a>";
+            htmlStr += "<p><a href='#' id='clickthroughInitialiser' data-uri='" + services.clickthrough.id + "' data-token='" + services.token.id + "'>Option 2: Self-closing window</a></p>";
+            $('#authBoxAdditional').html(htmlStr);            
+            $('#clickthroughInitialiser').bind('click', doClickthroughViaWindow);
+        }
+        else {
+            $('#authAction').attr('data-login-or-out', services.login.id);
+            $('#authAction').attr('data-token', services.token.id);
+            changeAuthAction(services.login.label);
+        }
+    }
+
+    function doClickthroughViaWindow(ev) {
+
+        var authSvc = $(this).attr('data-uri');
+        var tokenSvc = $(this).attr('data-token');
+        log("Opening click through service - " + authSvc + " - with token service " + tokenSvc);
+        var win = window.open(authSvc); //  
+        var pollTimer = window.setInterval(function () {
+            if (win.closed) {
+                window.clearInterval(pollTimer);
+                if (tokenSvc) {
+                    on_authed(tokenSvc);
+                }
+            }
+        }, 500);
     }
 
     function writeMessageOnViewer(msg) {
@@ -260,6 +298,8 @@ var tokenStore = {};
     }
 
     function changeAuthAction(text) {
+        $('#authAction').show();
+        $('#authBoxAdditional').html('');
         $('#authAction').html(text);
         flash('#authAction');
     }
@@ -268,8 +308,7 @@ var tokenStore = {};
         $(selector).addClass('bred').fadeOut(100).fadeIn(300).fadeOut(100).fadeIn(300);
         window.setTimeout(function () { $(selector).removeClass("bred"); }, 800);
     }
-
-
+        
     function getServices(info) {
         var svcInfo = {};
         var services;
@@ -282,12 +321,21 @@ var tokenStore = {};
                 services = info.service;
             }
             var prefix = 'http://iiif.io/api/image/2/auth/';
+            var clickThrough = 'http://wellcomelibrary.org/ld/iiif-ext/0/accept-terms-click-through';
             for (var service, i = 0; (service = services[i]) ; i++) {
 
                 if (service['profile'].indexOf(prefix) === 0) {
                     var serviceName = service['profile'].slice(prefix.length);
                     log("Found " + serviceName + " auth service");
                     svcInfo[serviceName] = { id: service['@id'], label: service.label };
+                }
+                else if (service['profile'] == clickThrough) {
+                    var serviceName = 'clickthrough';
+                    log("Found click through service");
+                    svcInfo[serviceName] = {
+                        id: service['@id'],
+                        label: service.label
+                    };
                 }
             }
         }
@@ -375,7 +423,13 @@ var tokenStore = {};
     $('#infoJsonBtn').bind('click', loadInfoJsonSpeculatively);
     $("#infoSelect").bind('change', loadInfoJsonSpeculatively);
 
-    // start up
+        // start up
+    if (location.search && location.search.indexOf('?info=') === 0)
+    {
+        // select this info.json 
+        var infoJson = location.search.slice(6);
+        $('#infoSelect option[value="' + infoJson + '"]').attr("selected", "selected");
+    }
     loadInfoJsonSpeculatively();
 
 
