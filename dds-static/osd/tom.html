@@ -243,7 +243,7 @@ var tokenStore = {};
 
         if (jqXHR.status == 200) {
             loadSeadragon(infoJson);
-            if (services.login.logout) {
+            if (services.login && services.login.logout) { 
                 $('#authAction').attr('data-login-or-out', services.login.logout.id);
                 $('#authAction').attr('data-token', services.login.token.id);
                 changeAuthAction(services.login.logout.label);
@@ -251,7 +251,7 @@ var tokenStore = {};
             return;
         }
 
-        if (services.login.token && services.login.token.id !== jqXHR.tokenServiceUsed) {
+        if (services.login && services.login.token && services.login.token.id !== jqXHR.tokenServiceUsed) {
             log("The info.json request was speculative and needs to be retried with the found token service");
             var storedToken = getValidToken(services.login.token.id);
             if (storedToken) {
