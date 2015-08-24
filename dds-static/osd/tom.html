@@ -6,10 +6,15 @@
     <style>
         .bred { color: red; border: 1px solid red;font-weight: bold;}
         #authbox{
-            margin-top: 10px; height: 90px; border: 2px solid green; width: 90%;
+            margin-top: 10px; height: 90px; border: 2px solid green; 
             font-family:sans-serif;
             font-size:11px;
             padding:4px;
+        }
+        #log{
+            margin-top: 10px; padding: 5px; border: 2px solid gray; font-size: 11px; font-family: sans-serif; color: gray;
+            height:200px;
+            overflow:scroll;
         }
     </style>
 </head>
@@ -25,9 +30,9 @@
         <button class="authInit" id="authAction">...waiting</button>
         <p id="authBoxAdditional"></p>
     </div>
-    <div id="log" style="margin-top: 10px; padding: 5px; border: 2px solid gray; font-size: 12px; font-family: sans-serif; color: gray;"></div>
+    <div id="log" style=""></div>
 </div>
-<div style="width: 850px; float:left">
+<div style="width: 650px; float:left">
     <div style="width: 90%">
         <input type="checkbox" id="beSmart"/> <label for="beSmart">Pre-empt info.json with last used valid token for domain</label>
         <br/>
@@ -45,7 +50,7 @@
         </select>
         <button id="infoJsonBtn">Go!</button>
     </div>
-    <div id="container" style="width: 805px; height: 605px;"></div>
+    <div id="container" style="width: 630px; height: 605px;"></div>
 </div>
     <script src="openseadragon/openseadragon.min.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -106,7 +111,9 @@ var tokenStore = {};
     var seenInfos = []; // store the @id of seen infos. Detecting a redirect is done by comparing the request uri with the @id of the response. If they are different a redirect happened.
     
     function log(text) {
-        $('#log').append(text + "<br>");
+        var logDiv = $('#log');
+        logDiv.append(text + "<br>");
+        logDiv.scrollTop(logDiv[0].scrollHeight);
         console.log(text);
     }
 
@@ -215,7 +222,7 @@ var tokenStore = {};
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
             
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.token.id);
+            $('#authAction').attr('data-token', services.login.token.id);
             changeAuthAction(services.login.label);
             $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
@@ -236,17 +243,17 @@ var tokenStore = {};
 
         if (jqXHR.status == 200) {
             loadSeadragon(infoJson);
-            if (services.logout) {
-                $('#authAction').attr('data-login-or-out', services.logout.id);
-                $('#authAction').attr('data-token', services.token.id);
-                changeAuthAction(services.logout.label);
+            if (services.login.logout) {
+                $('#authAction').attr('data-login-or-out', services.login.logout.id);
+                $('#authAction').attr('data-token', services.login.token.id);
+                changeAuthAction(services.login.logout.label);
             }
             return;
         }
 
-        if (services.token && services.token.id !== jqXHR.tokenServiceUsed) {
+        if (services.login.token && services.login.token.id !== jqXHR.tokenServiceUsed) {
             log("The info.json request was speculative and needs to be retried with the found token service");
-            var storedToken = getValidToken(services.token.id);
+            var storedToken = getValidToken(services.login.token.id);
             if (storedToken) {
                 doInfoAjax(getInfoUri(), on_info_complete, true, storedToken);
                 return;
@@ -266,13 +273,13 @@ var tokenStore = {};
             var htmlStr = '<p>This is a click through auth. Label is <i>' + services.clickthrough.label + '</i></p>';
             var redirect = encodeURI(location.href.split("?")[0] + "?info=" + getInfoUri());
             htmlStr += "<p><a href='" + services.clickthrough.id + "?redirecturl=" + redirect + "'>Option 1: With redirect parameter</a>";
-            htmlStr += "<p><a href='#' id='clickthroughInitialiser' data-uri='" + services.clickthrough.id + "' data-token='" + services.token.id + "'>Option 2: Self-closing window</a></p>";
+            htmlStr += "<p><a href='#' id='clickthroughInitialiser' data-uri='" + services.clickthrough.id + "' data-token='" + services.clickthrough.token.id + "'>Option 2: Self-closing window</a></p>";
             $('#authBoxAdditional').html(htmlStr);            
             $('#clickthroughInitialiser').bind('click', doClickthroughViaWindow);
         }
         else {
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.token.id);
+            $('#authAction').attr('data-token', services.login.token.id);
             changeAuthAction(services.login.label);
         }
     }
@@ -320,22 +327,30 @@ var tokenStore = {};
                 // array of service
                 services = info.service;
             }
-            var prefix = 'http://iiif.io/api/image/2/auth/';
+            var prefix = 'http://iiif.io/api/auth/0/';
             var clickThrough = 'http://wellcomelibrary.org/ld/iiif-ext/0/accept-terms-click-through';
             for (var service, i = 0; (service = services[i]) ; i++) {
-
+                var serviceName;
                 if (service['profile'].indexOf(prefix) === 0) {
-                    var serviceName = service['profile'].slice(prefix.length);
+                    serviceName = service['profile'].slice(prefix.length);
                     log("Found " + serviceName + " auth service");
                     svcInfo[serviceName] = { id: service['@id'], label: service.label };
+                    
                 }
                 else if (service['profile'] == clickThrough) {
-                    var serviceName = 'clickthrough';
+                    serviceName = 'clickthrough';
                     log("Found click through service");
                     svcInfo[serviceName] = {
                         id: service['@id'],
                         label: service.label
                     };
+                }
+                if (service.service && serviceName) {
+                    for (var service2, j = 0; (service2 = service.service[j]) ; j++) {
+                        var nestedServiceName = service2['profile'].slice(prefix.length);
+                        log("Found nested " + nestedServiceName + " auth service");
+                        svcInfo[serviceName][nestedServiceName] = { id: service2['@id'], label: service2.label };
+                    }
                 }
             }
         }
@@ -345,7 +360,7 @@ var tokenStore = {};
     function resetSeadragon() {
         $('#openseadragon').remove();
         //$('#authbox').empty();
-        $('#container').append('<div id="openseadragon" style="width: 800px; height: 600px; border: 2px solid purple" ></div>');
+        $('#container').append('<div id="openseadragon" style="width: 600px; height: 600px; border: 2px solid purple" ></div>');
     }
 
     function loadSeadragon(data) {
