@@ -13,14 +13,15 @@
 </head>
 <body>
 
-      <button id="popButton">pop...</button>
+        <button id="popButton" data-uri="popup.html">pop...</button>
+        <button id="popButtonR" data-uri="popup-r.html">pop with redirect</button>
 <hr/>
 
 <div id="log"></div>
 
-      <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
-    <script type="text/javascript">
+  <script type="text/javascript">
 
     function log(text) {
         var logDiv = $('#log');
@@ -29,19 +30,25 @@
         console.log(text);
     }
 
-    function do_pop() {
-      var win = window.open('popup.html'); //
-      var pollTimer = window.setInterval(function () {
-          if (win.closed) {
-              window.clearInterval(pollTimer);
-              log('Window closed, now call token service...')
-          } else {
-            log('window still open.')
-          }
-      }, 500);
-    }
+    function do_pop(ev) {
+        var uri = $(this).attr('data-uri');
+          var win = window.open(uri); //
+          var pollTimer = window.setInterval(function () {
+              if (win.closed) {
+                  window.clearInterval(pollTimer);
+                  log('Window closed, now call token service...')
+              } else {
+                log('window still open.')
+              }
+          }, 500);
+        }
 
-    $('#popButton').bind('click', do_pop);
+        function(do_pop_1) { do_pop('popup.html'); }
+        function(do_pop_r) { do_pop('popup-r.html'); }
+
+
+
+        $('button').bind('click', do_pop);
 
 
 
