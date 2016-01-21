@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8"/>
+    <style>
+        #log{
+            margin-top: 10px; padding: 5px; border: 2px solid gray; font-size: 11px; font-family: sans-serif; color: gray;
+            height:400px;
+            overflow:scroll;
+        }
+    </style>
+</head>
+<body>
+
+      <button id="popButton">pop...</button>
+<hr/>
+
+<div id="log"></div>
+
+      <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <script type="text/javascript">
+
+    function log(text) {
+        var logDiv = $('#log');
+        logDiv.append(text + "<br>");
+        logDiv.scrollTop(logDiv[0].scrollHeight);
+        console.log(text);
+    }
+
+    function do_pop() {
+      var win = window.open('popup.html'); //
+      var pollTimer = window.setInterval(function () {
+          if (win.closed) {
+              window.clearInterval(pollTimer);
+              log('Window closed, now call token service...')
+          } else {
+            log('window still open.')
+          }
+      }, 500);
+    }
+
+    $('#pop').bind('click', do_pop);
+
+
+
+
+</script>
+</body>
+</html>
