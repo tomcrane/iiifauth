@@ -38,6 +38,9 @@
         <br/>
         <select id="infoSelect" style="width:90%">
             <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json"></option>
+            <option label="---" value=""></option>
+            <option label="Accept terms simulation" value="http://wellcomelibrary.org/iiif-img/b19808562-0/8afdc6f6-9b3e-4207-9ec0-0a18acac7969/info.json"></option>
+            <option label="---" value=""></option>
             <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
             <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
             <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
@@ -119,6 +122,8 @@ var tokenStore = {};
 
     function loadInfoJsonSpeculatively() {
         var uri = getInfoUri();
+        if(url.indexOf("http") == -1) return;
+
         if ($('#beSmart').prop('checked')) {
             var mostRecentTokenForDomain = getMostRecentValidTokenForImageServiceDomain(uri);
             if (mostRecentTokenForDomain) {
