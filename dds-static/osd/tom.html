@@ -6,7 +6,7 @@
     <style>
         .bred { color: red; border: 1px solid red;font-weight: bold;}
         #authbox{
-            margin-top: 10px; height: 90px; border: 2px solid green; 
+            margin-top: 10px; height: 90px; border: 2px solid green;
             font-family:sans-serif;
             font-size:11px;
             padding:4px;
@@ -40,7 +40,7 @@
             <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json"></option>
             <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
             <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
-            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>            
+            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
             <option label="Crick (AC-clickthrough), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
             <option label="Crick (AC-clickthrough), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
             <option label="Crick (AC-clickthrough), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
@@ -72,7 +72,7 @@
     //    viewer.addHandler('open', handle_open);
     //    viewer.addHandler('failed-open', handle_open);
     //}
-        
+
     //function handle_open(event) {
     //    var info = event.eventSource.source;
     //    // This only gets called when we're NOT authed, so no need to put in logout
@@ -104,12 +104,12 @@
 
     // -------------------------------------------------------------
 
-jQuery.support.cors = true;    
+jQuery.support.cors = true;
 
 var tokenStore = {};
     tokenStore.domains = {};
     var seenInfos = []; // store the @id of seen infos. Detecting a redirect is done by comparing the request uri with the @id of the response. If they are different a redirect happened.
-    
+
     function log(text) {
         var logDiv = $('#log');
         logDiv.append(text + "<br>");
@@ -130,7 +130,7 @@ var tokenStore = {};
         log("loading anon: " + uri);
         doInfoAjax(uri, on_info_complete, true);
     }
-    
+
     function getInfoUri() {
         return $('#infoSelect').val();
     }
@@ -152,7 +152,7 @@ var tokenStore = {};
         return null;
     }
 
-    
+
     function getValidToken(id) {
         var token = tokenStore[id];
         if (token) {
@@ -220,7 +220,7 @@ var tokenStore = {};
         if (jqXHR.status == 200 && jqXHR.originalId !== infoJson['@id']) {
             log("redirect detected -  - NEED TO HANDLE");
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
-            
+
             $('#authAction').attr('data-login-or-out', services.login.id);
             $('#authAction').attr('data-token', services.login.token.id);
             changeAuthAction(services.login.label);
@@ -243,7 +243,7 @@ var tokenStore = {};
 
         if (jqXHR.status == 200) {
             loadSeadragon(infoJson);
-            if (services.login && services.login.logout) { 
+            if (services.login && services.login.logout) {
                 $('#authAction').attr('data-login-or-out', services.login.logout.id);
                 $('#authAction').attr('data-token', services.login.token.id);
                 changeAuthAction(services.login.logout.label);
@@ -274,7 +274,7 @@ var tokenStore = {};
             var redirect = encodeURI(location.href.split("?")[0] + "?info=" + getInfoUri());
             htmlStr += "<p><a href='" + services.clickthrough.id + "?redirecturl=" + redirect + "'>Option 1: With redirect parameter</a>";
             htmlStr += "<p><a href='#' id='clickthroughInitialiser' data-uri='" + services.clickthrough.id + "' data-token='" + services.clickthrough.token.id + "'>Option 2: Self-closing window</a></p>";
-            $('#authBoxAdditional').html(htmlStr);            
+            $('#authBoxAdditional').html(htmlStr);
             $('#clickthroughInitialiser').bind('click', doClickthroughViaWindow);
         }
         else {
@@ -289,7 +289,7 @@ var tokenStore = {};
         var authSvc = $(this).attr('data-uri');
         var tokenSvc = $(this).attr('data-token');
         log("Opening click through service - " + authSvc + " - with token service " + tokenSvc);
-        var win = window.open(authSvc); //  
+        var win = window.open(authSvc); //
         var pollTimer = window.setInterval(function () {
             if (win.closed) {
                 window.clearInterval(pollTimer);
@@ -315,7 +315,7 @@ var tokenStore = {};
         $(selector).addClass('bred').fadeOut(100).fadeIn(300).fadeOut(100).fadeIn(300);
         window.setTimeout(function () { $(selector).removeClass("bred"); }, 800);
     }
-        
+
     function getServices(info) {
         var svcInfo = {};
         var services;
@@ -335,7 +335,7 @@ var tokenStore = {};
                     serviceName = service['profile'].slice(prefix.length);
                     log("Found " + serviceName + " auth service");
                     svcInfo[serviceName] = { id: service['@id'], label: service.label };
-                    
+
                 }
                 else if (service['profile'] == clickThrough) {
                     serviceName = 'clickthrough';
@@ -381,13 +381,17 @@ var tokenStore = {};
             // The redirected to window will self-close
             // open/closed state is the only thing we can see across domains :(
             log("Opening Auth service - " + authSvc + " - with token service " + tokenSvc);
-            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //  
+            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //
             var pollTimer = window.setInterval(function () {
+                log("Polling...");
                 if (win.closed) {
+                    log("Window closed!");
                     window.clearInterval(pollTimer);
                     if (tokenSvc) {
                         on_authed(tokenSvc);
                     }
+                } else {
+                  log("Window still open...");
                 }
             }, 500);
         } else {
@@ -441,7 +445,7 @@ var tokenStore = {};
         // start up
     if (location.search && location.search.indexOf('?info=') === 0)
     {
-        // select this info.json 
+        // select this info.json
         var infoJson = location.search.slice(6);
         $('#infoSelect option[value="' + infoJson + '"]').attr("selected", "selected");
     }
