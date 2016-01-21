@@ -122,7 +122,7 @@ var tokenStore = {};
 
     function loadInfoJsonSpeculatively() {
         var uri = getInfoUri();
-        if(url.indexOf("http") == -1) return;
+        if(!uri || uri.indexOf("http") == -1) return;
 
         if ($('#beSmart').prop('checked')) {
             var mostRecentTokenForDomain = getMostRecentValidTokenForImageServiceDomain(uri);
