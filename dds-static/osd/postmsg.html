@@ -175,13 +175,13 @@
         var infoJson = $.parseJSON(jqXHR.responseText);
         var services = getServices(infoJson);
 
-        $('#authAction').attr('data-login-or-out', services.login.id);
-        $('#authAction').attr('data-token', services.login.token.id + "message"); // adding the message forces the second method
 
         if (jqXHR.status == 200 && jqXHR.originalId !== infoJson['@id']) {
             log("redirect detected -  - NEED TO HANDLE");
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
 
+            $('#authAction').attr('data-login-or-out', services.login.id);
+            $('#authAction').attr('data-token', services.login.token.id + "message"); // adding the message forces the second method
             changeAuthAction(services.login.label);
             $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
