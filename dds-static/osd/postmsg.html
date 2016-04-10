@@ -23,7 +23,7 @@
     <h2>Popups</h2>
     <p>For forcing a login from a service</p>
     <button class="authInit" id="acceptTerms" data-login-or-out="/iiif/accepttermslogin" data-token="/iiif/tokenmessage">Accept terms dialogue</button>
-    <button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/tokenmessage">CAS dialogue</button>
+    <!--<button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/tokenmessage">CAS dialogue</button>-->
     <hr/>
     <p>Deduced service behaviour:</p>
     <div id="authbox" style="">
@@ -175,13 +175,13 @@
         var infoJson = $.parseJSON(jqXHR.responseText);
         var services = getServices(infoJson);
 
+        $('#authAction').attr('data-login-or-out', services.login.id);
+        $('#authAction').attr('data-token', services.login.token.id + "message"); // adding the message forces the second method
 
         if (jqXHR.status == 200 && jqXHR.originalId !== infoJson['@id']) {
             log("redirect detected -  - NEED TO HANDLE");
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
 
-            $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id);
             changeAuthAction(services.login.label);
             $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
@@ -204,7 +204,7 @@
             loadSeadragon(infoJson);
             if (services.login && services.login.logout) {
                 $('#authAction').attr('data-login-or-out', services.login.logout.id);
-                $('#authAction').attr('data-token', services.login.token.id);
+                $('#authAction').attr('data-token', services.login.token.id + "message");
                 changeAuthAction(services.login.logout.label);
             }
             return;
@@ -238,7 +238,7 @@
         }
         else {
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id);
+            $('#authAction').attr('data-token', services.login.token.id + "message");
             changeAuthAction(services.login.label);
         }
     }
@@ -340,7 +340,8 @@
             // The redirected to window will self-close
             // open/closed state is the only thing we can see across domains :(
             log("Opening Auth service - " + authSvc + " - with token service " + tokenSvc);
-            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //
+            // var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //
+            var win = window.open(authSvc); //
             var pollTimer = window.setInterval(function () {
                 log("Polling...");
                 if (win.closed) {
