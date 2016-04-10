@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8"/>
+    <style>
+        .bred { color: red; border: 1px solid red;font-weight: bold;}
+        #authbox{
+            margin-top: 10px; height: 90px; border: 2px solid green;
+            font-family:sans-serif;
+            font-size:11px;
+            padding:4px;
+        }
+        #log{
+            margin-top: 10px; padding: 5px; border: 2px solid gray; font-size: 11px; font-family: sans-serif; color: gray;
+            height:200px;
+            overflow:scroll;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 700px; margin-right: 20px; float: left">
+    <h2>Popups</h2>
+    <p>For forcing a login from a service</p>
+    <button class="authInit" id="acceptTerms" data-login-or-out="/iiif/accepttermslogin" data-token="/iiif/tokenterms">Accept terms dialogue</button>
+    <button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/tokencas">CAS dialogue</button>
+    <hr/>
+    <p>Deduced service behaviour:</p>
+    <div id="authbox" style="">
+        <button class="authInit" id="authAction">...waiting</button>
+        <p id="authBoxAdditional"></p>
+    </div>
+    <div id="log" style=""></div>
+</div>
+<div style="width: 650px; float:left">
+    <div style="width: 90%">
+        <input type="checkbox" id="beSmart"/> <label for="beSmart">Pre-empt info.json with last used valid token for domain</label>
+        <br/>
+        <select id="infoSelect" style="width:90%">
+            <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json"></option>
+            <option label="---" value=""></option>
+            <option label="Accept terms simulation" value="http://wellcomelibrary.org/iiif-img/b19808562-0/8afdc6f6-9b3e-4207-9ec0-0a18acac7969/info.json"></option>
+            <option label="---" value=""></option>
+            <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
+            <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
+            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
+            <option label="Crick (AC-clickthrough), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Crick (AC-clickthrough), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Crick (AC-clickthrough), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
+            <option label="Degraded, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+            <option label="Degraded, library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+            <option label="Degraded, local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+        </select>
+        <button id="infoJsonBtn">Go!</button>
+    </div>
+    <div id="container" style="width: 630px; height: 605px;"></div>
+</div>
+    <script src="openseadragon/openseadragon.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript">
+
+    
+
+    jQuery.support.cors = true;
+
+    var tokenStore = {};
+    tokenStore.domains = {};
+    var seenInfos = []; // store the @id of seen infos. Detecting a redirect is done by comparing the request uri with the @id of the response. If they are different a redirect happened.
+
+    function log(text) {
+        var logDiv = $('#log');
+        logDiv.append(text + "<br>");
+        logDiv.scrollTop(logDiv[0].scrollHeight);
+        console.log(text);
+    }
+
+    function loadInfoJsonSpeculatively() {
+        var uri = getInfoUri();
+        if(!uri || uri.indexOf("http") == -1) return;
+
+        if ($('#beSmart').prop('checked')) {
+            var mostRecentTokenForDomain = getMostRecentValidTokenForImageServiceDomain(uri);
+            if (mostRecentTokenForDomain) {
+                log("loading speculatively with token: " + uri);
+                doInfoAjax(uri, on_info_complete, true, mostRecentTokenForDomain);
+                return;
+            }
+        }
+        log("loading anon: " + uri);
+        doInfoAjax(uri, on_info_complete, true);
+    }
+
+    function getInfoUri() {
+        return $('#infoSelect').val();
+    }
+
+    function getMostRecentValidTokenForImageServiceDomain(uri) {
+        var domain = getDomain(uri);
+        var mostRecentTokenForDomain = tokenStore.domains[domain];
+        if (mostRecentTokenForDomain) {
+            var expires = new Date();
+            var now = new Date();
+            expires.setSeconds(mostRecentTokenForDomain.obtained.getSeconds() + mostRecentTokenForDomain.expiresIn);
+            if (expires > now) {
+                log("Found valid token in store + " + mostRecentTokenForDomain.accessToken);
+                return mostRecentTokenForDomain;
+            }
+            log("clearing token from store for domain " + domain + " because it has expired");
+            tokenStore.domains[domain] = null;
+        }
+        return null;
+    }
+
+
+    function getValidToken(id) {
+        var token = tokenStore[id];
+        if (token) {
+            var expires = new Date();
+            expires.setSeconds(token.obtained.getSeconds() + token.expiresIn);
+            if ((new Date()) < expires) {
+                return token;
+            }
+            log("clearing token from store because it has expired");
+            tokenStore[id] = null;
+        }
+        return null;
+    }
+
+    function getDomain(url) {
+        var matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+        return matches && matches[1];  // will be null if no match is found
+    }
+
+    function doInfoAjax(uri, callback, speculative, token) {
+        var opts = {};
+        opts.url = uri;
+        opts.cache = false;
+        opts.complete = callback;
+        opts.speculative = speculative;
+        if (token) {
+            opts.headers = { "Authorization": "Bearer " + token.accessToken }
+            opts.tokenServiceUsed = token['@id'];
+        }
+        // record some original request details on the jqXHR object
+        opts.beforeSend = function(jqXHR, settings) {
+            jqXHR.originalUrl = settings.url;
+            jqXHR.originalId = stripInfoJson(settings.url);
+            jqXHR.tokenServiceUsed = settings.tokenServiceUsed;
+            jqXHR.speculative = settings.speculative;
+        }
+        $.ajax(opts);
+    }
+
+    function doTokenAjax(uri, callback) {
+        var opts = {};
+        opts.tokenServiceUsed = uri;
+        opts.url = uri + "?callback=?"; // force jsonp
+        opts.dataType = "json";
+        opts.cache = false;
+        opts.complete = callback;
+        opts.beforeSend = function (jqXHR, settings) {
+            jqXHR.tokenServiceUsed = settings.tokenServiceUsed;
+        }
+        $.ajax(opts);
+    }
+
+    function stripInfoJson(url) {
+        var pos = url.indexOf("/info.json");
+        return url.slice(0, pos);
+    }
+
+    function on_info_complete(jqXHR, textStatus) {
+
+        log('info_complete: ' + textStatus);
+        var infoJson = $.parseJSON(jqXHR.responseText);
+        var services = getServices(infoJson);
+
+
+        if (jqXHR.status == 200 && jqXHR.originalId !== infoJson['@id']) {
+            log("redirect detected -  - NEED TO HANDLE");
+            log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
+
+            $('#authAction').attr('data-login-or-out', services.login.id);
+            $('#authAction').attr('data-token', services.login.token.id);
+            changeAuthAction(services.login.label);
+            $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
+
+            resetSeadragon();
+            loadSeadragon(infoJson);
+            return;
+
+            // TODO: handle this, have we seen before, if not do auth
+            // do we have it in seenInfos?
+            // if yes, then show "no further login..."
+            // if no, then show login UI on button.
+
+        } else {
+            log("Not a redirect");
+        }
+
+        resetSeadragon();
+
+        if (jqXHR.status == 200) {
+            loadSeadragon(infoJson);
+            if (services.login && services.login.logout) {
+                $('#authAction').attr('data-login-or-out', services.login.logout.id);
+                $('#authAction').attr('data-token', services.login.token.id);
+                changeAuthAction(services.login.logout.label);
+            }
+            return;
+        }
+
+        if (services.login && services.login.token && services.login.token.id !== jqXHR.tokenServiceUsed) {
+            log("The info.json request was speculative and needs to be retried with the found token service");
+            var storedToken = getValidToken(services.login.token.id);
+            if (storedToken) {
+                doInfoAjax(getInfoUri(), on_info_complete, true, storedToken);
+                return;
+            }
+        }
+
+        if (jqXHR.status == 403) {
+            writeMessageOnViewer("You are FORBIDDEN from seeing this.");
+            return;
+        }
+
+        // 401
+        log("Assume a 401");
+        writeMessageOnViewer("You need to log in to see this");
+        if (services.clickthrough) {
+            $('#authAction').hide();
+            var htmlStr = '<p>This is a click through auth. Label is <i>' + services.clickthrough.label + '</i></p>';
+            var redirect = encodeURI(location.href.split("?")[0] + "?info=" + getInfoUri());
+            htmlStr += "<p><a href='" + services.clickthrough.id + "?redirecturl=" + redirect + "'>Option 1: With redirect parameter</a>";
+            htmlStr += "<p><a href='#' id='clickthroughInitialiser' data-uri='" + services.clickthrough.id + "' data-token='" + services.clickthrough.token.id + "'>Option 2: Self-closing window</a></p>";
+            $('#authBoxAdditional').html(htmlStr);
+            $('#clickthroughInitialiser').bind('click', doClickthroughViaWindow);
+        }
+        else {
+            $('#authAction').attr('data-login-or-out', services.login.id);
+            $('#authAction').attr('data-token', services.login.token.id);
+            changeAuthAction(services.login.label);
+        }
+    }
+
+    function doClickthroughViaWindow(ev) {
+
+        var authSvc = $(this).attr('data-uri');
+        var tokenSvc = $(this).attr('data-token');
+        log("Opening click through service - " + authSvc + " - with token service " + tokenSvc);
+        var win = window.open(authSvc); //
+        var pollTimer = window.setInterval(function () {
+            if (win.closed) {
+                window.clearInterval(pollTimer);
+                if (tokenSvc) {
+                    on_authed(tokenSvc);
+                }
+            }
+        }, 500);
+    }
+
+    function writeMessageOnViewer(msg) {
+        $('#openseadragon').html("<h3>" + msg + "</h3>");
+    }
+
+    function changeAuthAction(text) {
+        $('#authAction').show();
+        $('#authBoxAdditional').html('');
+        $('#authAction').html(text);
+        flash('#authAction');
+    }
+
+    function flash(selector) {
+        $(selector).addClass('bred').fadeOut(100).fadeIn(300).fadeOut(100).fadeIn(300);
+        window.setTimeout(function () { $(selector).removeClass("bred"); }, 800);
+    }
+
+    function getServices(info) {
+        var svcInfo = {};
+        var services;
+        log("Looking for auth services");
+        if (info.hasOwnProperty('service')) {
+            if (info.service.hasOwnProperty('@context')) {
+                services = [info.service];
+            } else {
+                // array of service
+                services = info.service;
+            }
+            var prefix = 'http://iiif.io/api/auth/0/';
+            var clickThrough = 'http://wellcomelibrary.org/ld/iiif-ext/0/accept-terms-click-through';
+            for (var service, i = 0; (service = services[i]) ; i++) {
+                var serviceName;
+                if (service['profile'].indexOf(prefix) === 0) {
+                    serviceName = service['profile'].slice(prefix.length);
+                    log("Found " + serviceName + " auth service");
+                    svcInfo[serviceName] = { id: service['@id'], label: service.label };
+
+                }
+                else if (service['profile'] == clickThrough) {
+                    serviceName = 'clickthrough';
+                    log("Found click through service");
+                    svcInfo[serviceName] = {
+                        id: service['@id'],
+                        label: service.label
+                    };
+                }
+                if (service.service && serviceName) {
+                    for (var service2, j = 0; (service2 = service.service[j]) ; j++) {
+                        var nestedServiceName = service2['profile'].slice(prefix.length);
+                        log("Found nested " + nestedServiceName + " auth service");
+                        svcInfo[serviceName][nestedServiceName] = { id: service2['@id'], label: service2.label };
+                    }
+                }
+            }
+        }
+        return svcInfo;
+    }
+
+    function resetSeadragon() {
+        $('#openseadragon').remove();
+        //$('#authbox').empty();
+        $('#container').append('<div id="openseadragon" style="width: 600px; height: 600px; border: 2px solid purple" ></div>');
+    }
+
+    function loadSeadragon(data) {
+        var viewer = OpenSeadragon({
+            id: "openseadragon",
+            tileSources: data,
+            showNavigator: true,
+            prefixUrl: "/iiifauth/dds-static/osd/openseadragon/images/"
+        });
+        return viewer;
+    }
+
+    function do_auth(evt) {
+        var authSvc = $(this).attr('data-login-or-out');
+        var tokenSvc = $(this).attr('data-token');
+
+        if (authSvc) {
+            // The redirected to window will self-close
+            // open/closed state is the only thing we can see across domains :(
+            log("Opening Auth service - " + authSvc + " - with token service " + tokenSvc);
+            var win = window.open(authSvc + "?t=" + new Date().getTime(), 'loginwindow', "height=600,width=600"); //
+            var pollTimer = window.setInterval(function () {
+                log("Polling...");
+                if (win.closed) {
+                    log("Window closed!");
+                    window.clearInterval(pollTimer);
+                    if (tokenSvc) {
+                        on_authed(tokenSvc);
+                    }
+                } else {
+                  log("Window still open...");
+                }
+            }, 500);
+        } else {
+            log("No auth service defined for this button, nothing will happen");
+        }
+    }
+
+    function on_authed(tokenSvc) {
+        log("Fetching Token");
+        doTokenAjax(tokenSvc, on_tokened);
+    }
+
+    function on_tokened(jqXHR) {
+
+        var error;
+        var token = jqXHR.responseJSON;
+        if (token.hasOwnProperty('accessToken')) {
+            error = false;
+            log("Got token: " + token.accessToken);
+            log("Expires in: " + token.expiresIn);
+        } else {
+            // error condition
+            error = true;
+            log("Got error: " + token.error);
+        }
+
+        var tokenDomain = getDomain(jqXHR.tokenServiceUsed);
+
+        if (error) {
+            // Error make unauthed viewer
+            tokenStore[jqXHR.tokenServiceUsed] = null;
+            tokenStore.domains[tokenDomain] = null;
+            resetSeadragon();
+            writeMessageOnViewer("Problem with token: " + token.error);
+            doInfoAjax(getInfoUri(), on_info_complete, false, null);
+        } else {
+            // store the token
+            token['obtained'] = new Date();
+            tokenStore[jqXHR.tokenServiceUsed] = token;
+            log("Storing token as most recent for domain " + tokenDomain);
+            tokenStore.domains[tokenDomain] = token;
+            doInfoAjax(getInfoUri(), on_info_complete, false, token);
+        }
+    }
+
+
+    $('button.authInit').bind('click', do_auth);
+    $('#infoJsonBtn').bind('click', loadInfoJsonSpeculatively);
+    $("#infoSelect").bind('change', loadInfoJsonSpeculatively);
+
+        // start up
+    if (location.search && location.search.indexOf('?info=') === 0)
+    {
+        // select this info.json
+        var infoJson = location.search.slice(6);
+        $('#infoSelect option[value="' + infoJson + '"]').attr("selected", "selected");
+    }
+    loadInfoJsonSpeculatively();
+
+
+</script>
+</body>
+</html>
