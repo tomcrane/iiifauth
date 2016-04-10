@@ -181,7 +181,7 @@
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
 
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id + "message"); // adding the message forces the second method
+            $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage")); // adding the message forces the second method
             changeAuthAction(services.login.label);
             $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
@@ -204,7 +204,7 @@
             loadSeadragon(infoJson);
             if (services.login && services.login.logout) {
                 $('#authAction').attr('data-login-or-out', services.login.logout.id);
-                $('#authAction').attr('data-token', services.login.token.id + "message");
+                $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage"))
                 changeAuthAction(services.login.logout.label);
             }
             return;
@@ -238,7 +238,7 @@
         }
         else {
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id + "message");
+            $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage"))
             changeAuthAction(services.login.label);
         }
     }
