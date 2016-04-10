@@ -151,18 +151,18 @@
         $.ajax(opts);
     }
 
-    function doTokenAjax(uri, callback) {
-        var opts = {};
-        opts.tokenServiceUsed = uri;
-        opts.url = uri + "?callback=?"; // force jsonp
-        opts.dataType = "json";
-        opts.cache = false;
-        opts.complete = callback;
-        opts.beforeSend = function (jqXHR, settings) {
-            jqXHR.tokenServiceUsed = settings.tokenServiceUsed;
-        }
-        $.ajax(opts);
-    }
+    // function doTokenAjax(uri, callback) {
+    //     var opts = {};
+    //     opts.tokenServiceUsed = uri;
+    //     opts.url = uri + "?callback=?"; // force jsonp
+    //     opts.dataType = "json";
+    //     opts.cache = false;
+    //     opts.complete = callback;
+    //     opts.beforeSend = function (jqXHR, settings) {
+    //         jqXHR.tokenServiceUsed = settings.tokenServiceUsed;
+    //     }
+    //     $.ajax(opts);
+    // }
 
     function stripInfoJson(url) {
         var pos = url.indexOf("/info.json");
@@ -368,10 +368,12 @@
     var trustedMessageOrigins = [];
     
     function doMessageToken(serviceUri) {
+        
         // I can send any data I like to the token service, it will send it back so I can match posts and their responses
         
         // If I feel OK to send the message, I can accept a reply from it. But I need to record the origin
         if(trustedMessageOrigins.indexOf(serviceUri) === -1) {
+            log("Adding " + serviceUri + " to trusted service origins")
             trustedMessageOrigins.push(serviceUri);
         }
         
@@ -380,15 +382,21 @@
         
         // In a proper viewer it would be better to do this as a hidden iFrame, but in this POC the tab is easier to diagnose
         var msgWin = window.open(serviceUri);
+        log("About to call postMessage with data " + msgId);
         msgWin.postMessage(msgId, serviceUri);
     }
 
     window.addEventListener("message", receiveToken, false);
     
     function receiveToken(event) {
+        
+        log("event received");
         if(trustedMessageOrigins.indexOf(event.origin) === -1) {
+            log(event.origin + " is not trusted, ending flow");
             return;
         }
+        
+        log(event.data);
         // our "spec" defines an expected form for the message data
         var msgId = event.data.postData; // we can use this to match the sent message if we need to
         var token = event.data.token;
