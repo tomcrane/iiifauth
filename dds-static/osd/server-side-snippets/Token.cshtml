@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>IIIF Authentication Token Service</title>
+</head>
+<body>
+<p>This window is for cross domain messaging.</p>
+<script>
+@if (Model.PermittedOrigins.Contains("*") && Request["forceWait"] != "true")
+{
+    // This service doesn't care who called it. It's relying on cookies to grant access to the resources; the token is a proxy for the cookie.
+    <text>
+    (window.opener || window.parent).postMessage(@Html.Raw(Model.JsonForPostMessage), '*');
+    </text>
+    if (Model.CloseWindow)
+    {
+   @: window.close();
+    }
+}
+else
+{
+    // This service won't post a valid token back to the opener unless it has established the sender's origin, and trusts it.
+    // Possibly that trust is established during the login step with some other messaging exchange, and remembered by the server.
+    // This part is TBC. Possible the token service has a different profile.
+    <text>
+    window.addEventListener("message", receiveMessage, false); 
+
+    function receiveMessage(event) {
+        var origin = event.origin || event.originalEvent.origin;
+        var whitelist = @Html.Raw(JsonConvert.SerializeObject(Model.PermittedOrigins)); // emitted by server, e.g., ["https://trusted.org", "https://annotate.org"];
+        if (whitelist.indexOf(origin) === -1 && whitelist.indexOf("*") === -1) {
+            return; // invalid origin
+        }
+        event.source.postMessage(@Html.Raw(Model.JsonForPostMessage), origin);
+        @if (Model.CloseWindow)
+        {
+       @: window.close();
+        }
+    }
+    </text>
+}
+</script>
+</body>
+</html>
