@@ -22,8 +22,8 @@
 <div style="width: 700px; margin-right: 20px; float: left">
     <h2>Popups</h2>
     <p>For forcing a login from a service</p>
-    <button class="authInit" id="acceptTerms" data-login-or-out="/iiif/accepttermslogin" data-token="/iiif/tokenmessage">Accept terms dialogue</button>
-    <!--<button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/tokenmessage">CAS dialogue</button>-->
+    <button class="authInit" id="acceptTerms" data-login-or-out="/iiif/accepttermslogin" data-token="/iiif/token">Accept terms dialogue</button>
+    <!--<button class="authInit" id="cas" data-login-or-out="/iiif/caslogin" data-token="/iiif/token">CAS dialogue</button>-->
     <hr/>
     <p>Deduced service behaviour:</p>
     <div id="authbox" style="">
@@ -181,7 +181,7 @@
             log("jqXHR.originalId = " + jqXHR.originalId + ", infoJson['@id'] = " + infoJson['@id']);
 
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage")); // adding the message forces the second method
+            $('#authAction').attr('data-token', services.login.token.id); 
             changeAuthAction(services.login.label);
             $('#authBoxAdditional').html('Hey, you\'re looking at a degraded image. Login to make it better.');
 
@@ -204,7 +204,7 @@
             loadSeadragon(infoJson);
             if (services.login && services.login.logout) {
                 $('#authAction').attr('data-login-or-out', services.login.logout.id);
-                $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage"))
+                $('#authAction').attr('data-token', services.login.token.id)
                 changeAuthAction(services.login.logout.label);
             }
             return;
@@ -238,7 +238,7 @@
         }
         else {
             $('#authAction').attr('data-login-or-out', services.login.id);
-            $('#authAction').attr('data-token', services.login.token.id.replace("/tokenterms", "/tokenmessage"))
+            $('#authAction').attr('data-token', services.login.token.id);
             changeAuthAction(services.login.label);
         }
     }
@@ -368,38 +368,35 @@
     var trustedMessageOrigins = [];
     
     function doMessageToken(serviceUri) {
-        
-        // I can send any data I like to the token service, it will send it back so I can match posts and their responses
-        
+                
+        var origin = getDomain(serviceUri); // this isn't the same but OK for this POC
         // If I feel OK to send the message, I can accept a reply from it. But I need to record the origin
-        if(trustedMessageOrigins.indexOf(serviceUri) === -1) {
-            log("Adding " + serviceUri + " to trusted service origins")
-            trustedMessageOrigins.push(serviceUri);
+        if(trustedMessageOrigins.indexOf(origin) === -1) {
+            log("Adding " + origin + " to trusted service origins")
+            trustedMessageOrigins.push(origin);
         }
         
         // pick an identifier for this message. We might want to keep track of sent messages
         var msgId = serviceUri + "|" + new Date().getTime(); //arbitrary
         
         // In a proper viewer it would be better to do this as a hidden iFrame, but in this POC the tab is easier to diagnose
-        var msgWin = window.open(serviceUri);
-        log("About to call postMessage with data " + msgId);
-        msgWin.postMessage(msgId, serviceUri);
+        window.addEventListener("message", receiveToken, false);
+        var msgWin = window.open(serviceUri + "?browser=1&close=1&id=" + msgId);
     }
 
-    window.addEventListener("message", receiveToken, false);
     
     function receiveToken(event) {
         
         log("event received");
-        if(trustedMessageOrigins.indexOf(event.origin) === -1) {
+        if(trustedMessageOrigins.indexOf(getDomain(event.origin)) === -1) {
             log(event.origin + " is not trusted, ending flow");
             return;
         }
         
         log(event.data);
-        // our "spec" defines an expected form for the message data
-        var msgId = event.data.postData; // we can use this to match the sent message if we need to
-        var token = event.data.token;
+        
+        window.removeEventListener("message", receiveToken)
+        var token = event.data;
         if (token.hasOwnProperty('accessToken')) {
             error = false;
             log("Got token: " + token.accessToken);
@@ -409,7 +406,7 @@
             error = true;
             log("Got error: " + token.error);
         }
-        var tokenServiceUsed = msgId.split("|")[0];
+        var tokenServiceUsed = token.id.split("|")[0];
         var tokenDomain = getDomain(tokenServiceUsed);
         
         if (error) {
