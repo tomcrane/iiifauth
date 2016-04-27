@@ -36,20 +36,19 @@
     <div style="width: 90%">
         <input type="checkbox" id="beSmart"/> <label for="beSmart">Pre-empt info.json with last used valid token for domain</label>
         <br/>
+        <input type="checkbox" id="useIFrame"/> <label for="useIFrame">Use iFrame</label>
+        <br/>
         <select id="infoSelect" style="width:90%">
-            <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json"></option>
+            <option label="Gerald, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json">http://wellcomelibrary.org/iiif-img/b18035978-0/bc556d06-16f6-4525-b38c-e7203a9188c9/info.json</option>
             <option label="---" value=""></option>
-            <option label="Accept terms simulation" value="http://wellcomelibrary.org/iiif-img/b19808562-0/8afdc6f6-9b3e-4207-9ec0-0a18acac7969/info.json"></option>
+            <option label="Accept terms simulation" value="http://wellcomelibrary.org/iiif-img/b19808562-0/8afdc6f6-9b3e-4207-9ec0-0a18acac7969/info.json">http://wellcomelibrary.org/iiif-img/b19808562-0/8afdc6f6-9b3e-4207-9ec0-0a18acac7969/info.json</option>
             <option label="---" value=""></option>
-            <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
-            <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
-            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json"></option>
-            <option label="Crick (AC-clickthrough), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
-            <option label="Crick (AC-clickthrough), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
-            <option label="Crick (AC-clickthrough), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json"></option>
-            <option label="Degraded, wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
-            <option label="Degraded, library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
-            <option label="Degraded, local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b11599820-0/3cab2dd3-c56c-4d7e-b6e7-42cc053be2d0/info.json"></option>
+            <option label="Franklin (AC-regular), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json">http://wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json</option>
+            <option label="Franklin (AC-regular), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json">http://library-uat.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json</option>
+            <option label="Franklin (AC-regular), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json">http://local.wellcomelibrary.org/iiif-img/b19831377-0/d1e27a86-3a34-418e-ae43-df9974bd005c/info.json</option>
+            <option label="Crick (AC-clickthrough), wellcomelibrary.org" value="http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json">http://wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
+            <option label="Crick (AC-clickthrough), library-uat.wellcomelibrary.org" value="http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json">http://library-uat.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
+            <option label="Crick (AC-clickthrough), local.wellcomelibrary.org" value="http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json">http://local.wellcomelibrary.org/iiif-img/b1818893x-0/e100fbe3-5f1c-49b7-a6ce-7bf82be23c1e/info.json</option>
         </select>
         <button id="infoJsonBtn">Go!</button>
     </div>
@@ -62,6 +61,8 @@
     
 
     jQuery.support.cors = true;
+    
+    var tokenMessageWindow = {}; // global for message window
 
     var tokenStore = {};
     tokenStore.domains = {};
@@ -381,7 +382,12 @@
         
         // In a proper viewer it would be better to do this as a hidden iFrame, but in this POC the tab is easier to diagnose
         window.addEventListener("message", receiveToken, false);
-        var msgWin = window.open(serviceUri + "?browser=1&close=1&id=" + msgId);
+        var tokenUrl = serviceUri + "?browser=1&id=" + msgId;
+        if ($('#useIFrame').prop('checked')) {
+            $('#commsFrame').prop('src', tokenUrl)   
+        } else {
+            tokenMessageWindow = window.open(tokenUrl + "&close=1");
+        }
     }
 
     
@@ -395,7 +401,12 @@
         
         log(event.data);
         
-        window.removeEventListener("message", receiveToken)
+        window.removeEventListener("message", receiveToken);
+        if ($('#useIFrame').prop('checked')) {
+            $('#commsFrame').prop('src', "resting.html")   
+        } else {
+            tokenMessageWindow = window.open(tokenUrl);
+        }
         var token = event.data;
         if (token.hasOwnProperty('accessToken')) {
             error = false;
@@ -475,5 +486,9 @@
 
 
 </script>
+
+<iframe id="commsFrame" width="100px" height="60px">
+    
+</iframe>
 </body>
 </html>
