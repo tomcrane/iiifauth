@@ -379,7 +379,7 @@
         
         // In a proper viewer it would be better to do this as a hidden iFrame, but in this POC the tab is easier to diagnose
         window.addEventListener("message", receiveToken, false);
-        var tokenUrl = serviceUri + "?browser=1&id=" + msgId;
+        var tokenUrl = serviceUri + "?messageId=" + msgId;
         if ($('#useIFrame').prop('checked')) {
             $('#commsFrame').prop('src', tokenUrl)   
         } else {
@@ -414,7 +414,7 @@
             error = true;
             log("Got error: " + token.error);
         }
-        var tokenServiceUsed = token.id.split("|")[0];
+        var tokenServiceUsed = token.messageId.split("|")[0];
         var tokenDomain = getDomain(tokenServiceUsed);
         
         if (error) {
