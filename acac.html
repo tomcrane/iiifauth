@@ -37,14 +37,14 @@
     <script>
 
         $.ajax({
-            url: $('#authed').text();
+            url: $('#authed').text(),
         }).always(function(xhr){
             $('#info1').text(xhr.responseText);
             $('#info1Status').text(xhr.status + " - " + xhr.statusText);
         });
         
         $.ajax({
-            url: $('#authed').text();
+            url: $('#authed').text(),
             xhrFields: {
                 withCredentials: true
             }
@@ -55,14 +55,14 @@
 
 
         $.ajax({
-            url: $('#open').text();
+            url: $('#open').text(),
         }).always(function(xhr){
             $('#info3').text(xhr.responseText);
             $('#info3Status').text(xhr.status + " - " + xhr.statusText);
         });
         
         $.ajax({
-            url: $('#open').text();
+            url: $('#open').text(),
             xhrFields: {
                 withCredentials: true
             }
