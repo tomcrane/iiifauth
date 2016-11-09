@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>ACAC</title>
+</head>
+<body>
+
+    <p>No creds</p>
+    <p id="info1Status"></p>
+    <pre id="info1"></pre>
+
+    <p>.withCredentials</p>
+    <p id="info2Status"></p>
+    <pre id="info2"></pre>
+	
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script>
+
+        var infoJson = "http://local.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json";
+
+
+        $.ajax({
+            url: infoJson
+        }).done(function(data, textStatus, xhr){
+            $('#info1').text(data);
+            $('#info1Status').text(xhr.status + " - " + textStatus);
+        });
+        
+        $.ajax({
+            url: infoJson,
+            xhrFields: {
+                withCredentials: true
+            }
+        }).done(function(data, textStatus, xhr){
+            $('#info2').text(data);
+            $('#info2Status').text(xhr.status + " - " + textStatus);
+        });
+
+    </script>
+
+</body>
+</html>
