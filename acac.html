@@ -19,22 +19,22 @@
 <hr/>
     <strong id="authed">https://library-uat.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json</strong>
     <p>No creds</p>
-    <p id="info1Status"></p>
-    <pre id="info1"></pre>
+    <p id="info1Status" class="info"></p>
+    <pre id="info1" class="info"></pre>
 
     <p>.withCredentials</p>
-    <p id="info2Status"></p>
-    <pre id="info2"></pre>
+    <p id="info2Status" class="info"></p>
+    <pre id="info2" class="info"></pre>
 
     
     <strong id="open">https://library-uat.wellcomelibrary.org/iiif-img/b21782763-0/2d2f8488-e156-4794-8eaa-edafa37ecffb/info.json</strong>
     <p>No creds</p>
-    <p id="info3Status"></p>
-    <pre id="info3"></pre>
+    <p id="info3Status" class="info"></p>
+    <pre id="info3" class="info"></pre>
 
     <p>.withCredentials</p>
-    <p id="info4Status"></p>
-    <pre id="info4"></pre>
+    <p id="info4Status" class="info"></p>
+    <pre id="info4" class="info"></pre>
 	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script>
@@ -62,6 +62,7 @@
         }
         
         function tryIt(){
+            $('.info').empty();
             $.ajax({
                 url: secSwitch('authed'),
                 beforeSend: function(xhr, settings){xhr.idx=1}
