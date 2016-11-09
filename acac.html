@@ -4,9 +4,16 @@
 <head>
 	<meta charset="utf-8" />
 	<title>ACAC</title>
+    <style>
+        pre {
+            height:200px;
+            overflow:scroll;
+
+        }
 </head>
 <body>
 
+    <strong id="authed">http://library-uat.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json</strong>
     <p>No creds</p>
     <p id="info1Status"></p>
     <pre id="info1"></pre>
@@ -14,22 +21,29 @@
     <p>.withCredentials</p>
     <p id="info2Status"></p>
     <pre id="info2"></pre>
+
+    
+    <strong id="open">http://library-uat.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json</strong>
+    <p>No creds</p>
+    <p id="info3Status"></p>
+    <pre id="info3"></pre>
+
+    <p>.withCredentials</p>
+    <p id="info4Status"></p>
+    <pre id="info24"></pre>
 	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script>
 
-        var infoJson = "http://local.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json";
-
-
         $.ajax({
-            url: infoJson
+            url: $('#authed').text();
         }).always(function(xhr){
             $('#info1').text(xhr.responseText);
             $('#info1Status').text(xhr.status + " - " + xhr.statusText);
         });
         
         $.ajax({
-            url: infoJson,
+            url: $('#authed').text();
             xhrFields: {
                 withCredentials: true
             }
@@ -38,6 +52,23 @@
             $('#info2Status').text(xhr.status + " - " + xhr.statusText);
         });
 
+
+        $.ajax({
+            url: $('#open').text();
+        }).always(function(xhr){
+            $('#info3').text(xhr.responseText);
+            $('#info3Status').text(xhr.status + " - " + xhr.statusText);
+        });
+        
+        $.ajax({
+            url: $('#open').text();
+            xhrFields: {
+                withCredentials: true
+            }
+        }).always(function(xhr){
+            $('#info4').text(xhr.responseText);
+            $('#info4Status').text(xhr.status + " - " + xhr.statusText);
+        });
     </script>
 
 </body>
