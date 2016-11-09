@@ -23,7 +23,7 @@
 
         $.ajax({
             url: infoJson
-        }).done(function(data, textStatus, xhr){
+        }).always(function(data, textStatus, xhr){
             $('#info1').text(data);
             $('#info1Status').text(xhr.status + " - " + textStatus);
         });
@@ -33,7 +33,7 @@
             xhrFields: {
                 withCredentials: true
             }
-        }).done(function(data, textStatus, xhr){
+        }).always(function(data, textStatus, xhr){
             $('#info2').text(data);
             $('#info2Status').text(xhr.status + " - " + textStatus);
         });
