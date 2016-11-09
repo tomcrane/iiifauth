@@ -53,7 +53,7 @@
             if(!$('#chkSec').is(':checked')){
                 url = url.replace("https://", "http://");
             }           
-            if(!$('#local').is(':checked')){
+            if($('#local').is(':checked')){
                 url = url.replace("//library-uat", "//local");
             }             
             return url;     
