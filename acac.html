@@ -12,7 +12,10 @@
         </style>
 </head>
 <body>
-
+    
+    
+    <input type="checkbox" id="chkSec" /> <label for="chkSec">https</label> 
+<hr/>
     <strong id="authed">https://library-uat.wellcomelibrary.org/iiif-img/b20204711-0/95400f5e-1447-4efa-bf88-43828184bf3f/info.json</strong>
     <p>No creds</p>
     <p id="info1Status"></p>
@@ -42,6 +45,14 @@
         function fail(xhr, textStatus, err){
             showResult(xhr);
         }
+        
+        function secSwitch(id){
+            var url = $('#' + id).text();
+            if(!$('#chkSec').is(':checked')){
+                url = url.replace("https://", "http://");
+            }             
+            return url;     
+        }
 
         function showResult(xhr){
             var pre = "#info" + xhr.idx;
@@ -50,12 +61,12 @@
         }
         
         $.ajax({
-            url: $('#authed').text(),
+            url: secSwitch('authed'),
             beforeSend: function(xhr, settings){xhr.idx=1}
         }).done(done).fail(fail);
         
         $.ajax({
-            url: $('#authed').text(),
+            url: secSwitch('authed'),
             xhrFields: {
                 withCredentials: true
             },
@@ -63,12 +74,12 @@
         }).done(done).fail(fail);
 
         $.ajax({
-            url: $('#open').text(),
+            url: secSwitch('open'),
             beforeSend: function(xhr, settings){xhr.idx=3}
         }).done(done).fail(fail);
         
         $.ajax({
-            url: $('#open').text(),
+            url: secSwitch('open'),
             xhrFields: {
                 withCredentials: true
             },
