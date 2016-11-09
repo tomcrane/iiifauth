@@ -8,7 +8,6 @@
         pre {
             height:200px;
             overflow:scroll;
-
         }
         </style>
 </head>
@@ -36,40 +35,45 @@
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script>
 
+        function done(data, textStatus, xhr){
+            showResult(xhr);
+        }
+        
+        function fail(xhr, textStatus, err){
+            showResult(xhr);
+        }
+
+        function showResult(xhr){
+            var pre = "#info" + xhr.idx;
+            $(pre).text(xhr.responseText);
+            $(pre + 'Status').text(xhr.status + " - " + xhr.statusText);
+        }
+        
         $.ajax({
             url: $('#authed').text(),
-        }).always(function(xhr){
-            $('#info1').text(xhr.responseText);
-            $('#info1Status').text(xhr.status + " - " + xhr.statusText);
-        });
+            beforeSend: function(xhr, settings){xhr.idx=1}
+        }).done(done).fail(fail);
         
         $.ajax({
             url: $('#authed').text(),
             xhrFields: {
                 withCredentials: true
-            }
-        }).always(function(xhr){
-            $('#info2').text(xhr.responseText);
-            $('#info2Status').text(xhr.status + " - " + xhr.statusText);
-        });
-
+            },
+            beforeSend: function(xhr, settings){xhr.idx=2}
+        }).done(done).fail(fail);
 
         $.ajax({
             url: $('#open').text(),
-        }).always(function(xhr){
-            $('#info3').text(xhr.responseText);
-            $('#info3Status').text(xhr.status + " - " + xhr.statusText);
-        });
+            beforeSend: function(xhr, settings){xhr.idx=3}
+        }).done(done).fail(fail);
         
         $.ajax({
             url: $('#open').text(),
             xhrFields: {
                 withCredentials: true
-            }
-        }).always(function(xhr){
-            $('#info4').text(xhr.responseText);
-            $('#info4Status').text(xhr.status + " - " + xhr.statusText);
-        });
+            },
+            beforeSend: function(xhr, settings){xhr.idx=4}
+        }).done(done).fail(fail);
     </script>
 
 </body>
