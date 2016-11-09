@@ -23,9 +23,9 @@
 
         $.ajax({
             url: infoJson
-        }).always(function(data, textStatus, xhr){
-            $('#info1').text(data);
-            $('#info1Status').text(xhr.status + " - " + textStatus);
+        }).always(function(xhr){
+            $('#info1').text(xhr.responseText);
+            $('#info1Status').text(xhr.status + " - " + xhr.statusText);
         });
         
         $.ajax({
@@ -33,9 +33,9 @@
             xhrFields: {
                 withCredentials: true
             }
-        }).always(function(data, textStatus, xhr){
-            $('#info2').text(data);
-            $('#info2Status').text(xhr.status + " - " + textStatus);
+        }).always(function(xhr){
+            $('#info2').text(xhr.responseText);
+            $('#info2Status').text(xhr.status + " - " + xhr.statusText);
         });
 
     </script>
